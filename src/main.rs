@@ -1,6 +1,12 @@
-use std::io::{BufRead, BufReader, Error, Lines};
+use std::io::{BufRead, BufReader, Lines};
 use std::fs::File;
 
+
+fn read_file(day: u8) -> Lines<BufReader<File>>{
+    let f_name = format!("src/inputs/day{day}.txt", day = day);
+    let reader = BufReader::new(File::open(f_name).unwrap());
+    return reader.lines()
+}
 
 fn day1_p1() -> u32{
     let f_name = "src/inputs/day1.txt";
@@ -70,11 +76,9 @@ fn day2_p1() -> u32 {
 }
 
 fn day2_p2() -> u32 {
-    let f_name = "src/inputs/day2.txt";
-    let reader = BufReader::new(File::open(f_name).expect("Cannot open file"));
     let mut correct: u32 = 0;
-    for _line in reader.lines() {
-        let line = _line.unwrap().clone();
+    for _line in read_file(2) {
+        let line = _line.unwrap();
         let v: Vec<&str> = line.split(|c| c == '-' || c == ' ' || c == ':').collect();
         let first_pos = v[0].parse::<usize>().unwrap();
         let second_pos = v[1].parse::<usize>().unwrap();
