@@ -1,4 +1,4 @@
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Error, Lines};
 use std::fs::File;
 
 
@@ -49,8 +49,49 @@ fn day1_p2() -> u32{
 
 }
 
+fn day2_p1() -> u32 {
+    let f_name = "src/inputs/day2.txt";
+    let reader = BufReader::new(File::open(f_name).expect("Cannot open file"));
+    let mut correct: u32 = 0;
+    for _line in reader.lines() {
+        let line = _line.unwrap().clone();
+        let v: Vec<&str> = line.split(|c| c == '-' || c == ' ' || c == ':').collect();
+        let target_min_count = v[0].parse::<usize>().unwrap();
+        let target_max_count = v[1].parse::<usize>().unwrap();
+        let target = v[2];
+        let actual_count = v[4].matches(target).count();
+        if actual_count >= target_min_count && actual_count <= target_max_count{
+            correct += 1;
+        }
+
+    }
+    return correct;
+
+}
+
+fn day2_p2() -> u32 {
+    let f_name = "src/inputs/day2.txt";
+    let reader = BufReader::new(File::open(f_name).expect("Cannot open file"));
+    let mut correct: u32 = 0;
+    for _line in reader.lines() {
+        let line = _line.unwrap().clone();
+        let v: Vec<&str> = line.split(|c| c == '-' || c == ' ' || c == ':').collect();
+        let first_pos = v[0].parse::<usize>().unwrap();
+        let second_pos = v[1].parse::<usize>().unwrap();
+        let target = v[2];
+        let in_pos_1 = v[4].as_bytes()[first_pos - 1] == target.as_bytes()[0];
+        let in_pos_2 = v[4].as_bytes()[second_pos - 1] == target.as_bytes()[0];
+        if in_pos_2 ^ in_pos_1{
+            correct += 1;
+        }
+
+    }
+    return correct;
+
+}
+
 
 fn main() {
-    let res = day1_p2();
+    let res = day2_p2();
     println!("{}", res);
 }
