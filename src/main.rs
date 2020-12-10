@@ -4,12 +4,14 @@ mod utils;
 mod day_01;
 mod day_02;
 mod day_03;
+mod day_04;
 
 fn runner(day: u8){
     match day {
         1 => day_01::solve(),
         2 => day_02::solve(),
         3 => day_03::solve(),
+        4 => day_04::solve(),
         _ => println!("Nothing on this day."),
     }
 }
