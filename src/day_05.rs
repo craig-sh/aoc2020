@@ -38,11 +38,11 @@ fn calc_seatid(boarding_pass: &str) -> usize {
 }
 
 fn part_1(boarding_passes: &Vec<&str>) -> usize {
-    let mut value = 0;
-    for boarding_pass in boarding_passes.into_iter() {
-        value = std::cmp::max(calc_seatid(boarding_pass), value);
-    }
-    return value;
+    let all_seats: Vec<usize> = boarding_passes
+        .into_iter()
+        .map(|x| calc_seatid(x))
+        .collect();
+    all_seats.into_iter().max().unwrap()
 }
 
 fn part_2(boarding_passes: &Vec<&str>) -> usize {
@@ -50,7 +50,9 @@ fn part_2(boarding_passes: &Vec<&str>) -> usize {
         .into_iter()
         .map(|x| calc_seatid(x))
         .collect();
+
     all_seats.sort();
+
     for (i, seat_id) in all_seats.clone().into_iter().enumerate() {
         if all_seats[i + 1] == seat_id + 2 {
             return seat_id + 1;
