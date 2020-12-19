@@ -10,6 +10,7 @@ mod day_07;
 mod day_08;
 mod day_09;
 mod day_10;
+mod day_11;
 mod utils;
 
 fn runner(day: u8) {
@@ -24,6 +25,7 @@ fn runner(day: u8) {
         8 => day_08::solve(),
         9 => day_09::solve(),
         10 => day_10::solve(),
+        11 => day_11::solve(),
         _ => println!("Nothing on this day."),
     }
 }
