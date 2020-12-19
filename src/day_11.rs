@@ -7,6 +7,7 @@ enum Terrain {
     EmptySeat,
     OccupiedSeat,
     Floor,
+    OutOfBounds,
 }
 
 impl fmt::Debug for Terrain {
@@ -15,6 +16,7 @@ impl fmt::Debug for Terrain {
             Terrain::EmptySeat => write!(f, "L"),
             Terrain::OccupiedSeat => write!(f, "#"),
             Terrain::Floor => write!(f, "."),
+            Terrain::OutOfBounds => write!(f, "_"),
         }
     }
 }
@@ -67,7 +69,7 @@ impl Map {
     fn get_terrain(&self, x: i32, y: i32) -> Terrain {
         match (x, y) {
             (_, _) if x >= self.width() as i32 || x < 0 || y >= self.height() as i32 || y < 0 => {
-                Terrain::Floor
+                Terrain::OutOfBounds
             }
             (x, y) => self.map[y as usize][x as usize].clone(),
         }
@@ -77,6 +79,21 @@ impl Map {
         let mut result = [Terrain::Floor; 8];
         for (pos, dir) in DIRECTIONS.iter().enumerate() {
             result[pos] = self.get_terrain(x as i32 + dir.0, y as i32 + dir.1)
+        }
+        return result;
+    }
+    fn adjacent_terrain_sight(&self, x: usize, y: usize) -> [Terrain; 8] {
+        let mut result = [Terrain::Floor; 8];
+        for (pos, dir) in DIRECTIONS.iter().enumerate() {
+            let mut search_x = x as i32;
+            let mut search_y = y as i32;
+            let mut terrain = Terrain::Floor;
+            while terrain == Terrain::Floor{
+                search_x += dir.0;
+                search_y += dir.1;
+                terrain = self.get_terrain(search_x, search_y);
+            }
+            result[pos] = terrain;
         }
         return result;
     }
@@ -112,6 +129,38 @@ impl Map {
         }
         return (changed, Map { map: new_map });
     }
+
+    fn simulate_p2(&mut self) -> (bool, Map) {
+        let mut changed = false;
+        let mut new_map: Vec<Vec<Terrain>> = Vec::new();
+        for (y, row) in self.map.iter().enumerate() {
+            new_map.push(
+                row.into_iter()
+                    .enumerate()
+                    .map(|(x, terrain)| {
+                        let adj = self.adjacent_terrain_sight(x, y);
+                        match terrain {
+                            Terrain::EmptySeat
+                                if adj.iter().all(|p| *p != Terrain::OccupiedSeat) =>
+                            {
+                                changed = true;
+                                Terrain::OccupiedSeat
+                            }
+                            Terrain::OccupiedSeat
+                                if adj.iter().filter(|p| **p == Terrain::OccupiedSeat).count()
+                                    >= 5 =>
+                            {
+                                changed = true;
+                                Terrain::EmptySeat
+                            }
+                            no_change => no_change.clone(),
+                        }
+                    })
+                    .collect(),
+            );
+        }
+        return (changed, Map { map: new_map });
+    }
 }
 
 pub fn solve() {
@@ -119,7 +168,7 @@ pub fn solve() {
     let raw_data = utils::clean_lines(&raw_data);
     let map = Map::new(raw_data);
     print!("Day 11 part 1: {}\n", part_1(map.clone()));
-    //print!("Day 11 part 2: {}\n", part_2(map.clone()));
+    print!("Day 11 part 2: {}\n", part_2(map.clone()));
 }
 
 fn part_1(map: Map) -> u32 {
@@ -140,7 +189,20 @@ fn part_1(map: Map) -> u32 {
 }
 
 fn part_2(map: Map) -> u32 {
-    unimplemented!()
+    let mut cur_map: Map = map;
+    loop {
+        let result = cur_map.simulate_p2();
+        cur_map = result.1;
+        if !result.0 {
+            break;
+        }
+    }
+    return cur_map
+        .map
+        .iter()
+        .flatten()
+        .filter(|p| **p == Terrain::OccupiedSeat)
+        .count() as u32;
 }
 
 #[cfg(test)]
